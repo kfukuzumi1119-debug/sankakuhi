@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>三角比メーカー｜直角三角形に数値を入れるだけで sin・cos・tan を計算（無料）</title>
+<meta name="description" content="直角三角形の図に、辺の長さ（高さ・底辺・斜辺）か角度を2つ入れるだけで、残りの辺と角、sin・cos・tan の値がすぐに出る無料の計算ツール。√ や分数の形でも答えを表示し、30°・45°・60° の正確な値もわかります。中学・高校の三角比の勉強や宿題の確かめに。登録不要でスマホからすぐ使えます。">
+<link rel="canonical" href="https://kfukuzumi1119-debug.github.io/sankakuhi/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="三角比メーカー｜直角三角形に数値を入れるだけで sin・cos・tan を計算（無料）">
+<meta property="og:description" content="直角三角形の図に、辺の長さ（高さ・底辺・斜辺）か角度を2つ入れるだけで、残りの辺と角、sin・cos・tan の値がすぐに出る無料の計算ツール。√ や分数の形でも答えを表示し、30°・45°・60° の正確な値もわかります。中学・高校の三角比の勉強や宿題の確かめに。登録不要でスマホからすぐ使えます。">
+<meta property="og:url" content="https://kfukuzumi1119-debug.github.io/sankakuhi/">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"三角比メーカー","url":"https://kfukuzumi1119-debug.github.io/sankakuhi/","description":"直角三角形の図に、辺の長さ（高さ・底辺・斜辺）か角度を2つ入れるだけで、残りの辺と角、sin・cos・tan の値がすぐに出る無料の計算ツール。√ や分数の形でも答えを表示し、30°・45°・60° の正確な値もわかります。中学・高校の三角比の勉強や宿題の確かめに。登録不要でスマホからすぐ使えます。","applicationCategory":"EducationalApplication","operatingSystem":"All","inLanguage":"ja","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}
+</script>
+<style>[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* 方眼ノートの上に直角三角形。辺ごとに色を決め、図と式で同じ色を使って「どの辺÷どの辺か」を目で追えるようにする */
+:root {
+  --paper: #f4f6f3;
+  --sheet: #fbfcfa;
+  --ink: #1c2733;
+  --muted: #5b6875;
+  --rule: #d9dfd8;
+  --grid: #e3e9e2;
+  --side-a: #c4462a;   /* 高さ（対辺） */
+  --side-b: #2a62a8;   /* 底辺（隣辺） */
+  --side-c: #2a7f4f;   /* 斜辺 */
+  --angle: #a8740a;
+  --fill: rgba(42, 98, 168, 0.06);
+  --warn-bg: #fdf0e6;
+  --warn-fg: #9a3b12;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #12171c; --sheet: #182027; --ink: #e5eaee; --muted: #9aa7b2;
+    --rule: #2c3741; --grid: #222c35;
+    --side-a: #f0866a; --side-b: #7eaef0; --side-c: #6cc994; --angle: #e6b84a;
+    --fill: rgba(126, 174, 240, 0.08); --warn-bg: #3a2418; --warn-fg: #f3b08a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #12171c; --sheet: #182027; --ink: #e5eaee; --muted: #9aa7b2;
+  --rule: #2c3741; --grid: #222c35;
+  --side-a: #f0866a; --side-b: #7eaef0; --side-c: #6cc994; --angle: #e6b84a;
+  --fill: rgba(126, 174, 240, 0.08); --warn-bg: #3a2418; --warn-fg: #f3b08a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.7;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 16px 48px; display: grid; gap: 20px; }
+header h1 { margin: 0; font-size: 1.6rem; font-weight: 700; letter-spacing: 0.02em; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 60ch; }
+.main { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .main { grid-template-columns: 1fr; } }
+
+.board {
+  background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px;
+  padding: 14px; display: grid; gap: 12px; min-width: 0;
+}
+.fig { position: relative; width: 100%; }
+.fig svg { display: block; width: 100%; height: auto; }
+.grid-line { stroke: var(--grid); stroke-width: 1; }
+.tri { fill: var(--fill); stroke: none; }
+.side { stroke-width: 5; stroke-linecap: round; transition: opacity .2s; }
+.side-a { stroke: var(--side-a); }
+.side-b { stroke: var(--side-b); }
+.side-c { stroke: var(--side-c); }
+.mark { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.arc { fill: none; stroke: var(--angle); stroke-width: 2.5; }
+.arc-label { fill: var(--angle); font: 600 18px var(--font-num); }
+.ghost .side, .ghost .tri { opacity: .3; }
+.fig[data-hl="sin"] .side-b, .fig[data-hl="cos"] .side-a, .fig[data-hl="tan"] .side-c { opacity: .15; }
+
+.field {
+  position: absolute; display: grid; gap: 2px; justify-items: center;
+  width: 7.2em; font-size: 13px; line-height: 1.3;
+}
+.field label { font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+.field[data-k="a"] label { color: var(--side-a); }
+.field[data-k="b"] label { color: var(--side-b); }
+.field[data-k="c"] label { color: var(--side-c); }
+.field[data-k="t"] label { color: var(--angle); }
+.field input {
+  width: 100%; font: 600 16px var(--font-num); text-align: center;
+  padding: 5px 4px; border-radius: 6px; border: 2px solid currentColor;
+  background: var(--sheet); color: var(--ink);
+}
+.field[data-k="a"] input { border-color: var(--side-a); }
+.field[data-k="b"] input { border-color: var(--side-b); }
+.field[data-k="c"] input { border-color: var(--side-c); }
+.field[data-k="t"] input { border-color: var(--angle); }
+.field input.computed { border-style: dashed; background: var(--paper); color: var(--muted); font-weight: 400; }
+.field input:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+.field .exact { font: 12px var(--font-num); color: var(--muted); min-height: 1.2em; }
+.tag { font: 10px var(--font-body); font-weight: 500; padding: 0 5px; border-radius: 4px; background: var(--rule); color: var(--muted); }
+
+.status { margin: 0; padding: 8px 12px; border-radius: 6px; background: var(--paper); color: var(--muted); font-size: 14px; }
+.status.err { background: var(--warn-bg); color: var(--warn-fg); }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.presets span { font-size: 13px; color: var(--muted); }
+button {
+  font: 500 13px var(--font-body); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--rule); border-radius: 999px; padding: 4px 12px; cursor: pointer;
+}
+button:hover { border-color: var(--muted); }
+button:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+
+.results { display: grid; gap: 12px; min-width: 0; }
+.card {
+  background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px;
+  padding: 12px 16px; display: grid; gap: 4px; cursor: default;
+}
+.card:hover, .card:focus-within { border-color: var(--muted); }
+.card .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card .fn { font: 600 18px var(--font-num); }
+.card .hint { font-size: 13px; color: var(--muted); }
+.eq { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font: 400 17px var(--font-num); font-variant-numeric: tabular-nums; }
+.frac { display: inline-grid; justify-items: center; line-height: 1.25; }
+.frac > span { padding: 0 4px; }
+.frac > span:first-child { border-bottom: 2px solid var(--ink); }
+.frac .a { color: var(--side-a); } .frac .b { color: var(--side-b); } .frac .c { color: var(--side-c); }
+.eq .dec { font-weight: 600; font-size: 22px; }
+.eq .ex { color: var(--ink); }
+.op { color: var(--muted); }
+.angles { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 16px; display: grid; grid-template-columns: auto 1fr; gap: 2px 16px; font-size: 14px; }
+.angles dt { color: var(--muted); }
+.angles dd { margin: 0; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.memo { font-size: 13px; color: var(--muted); max-width: 70ch; }
+.memo b { color: var(--ink); }
+@media (max-width: 480px) {
+  .field { width: 5.6em; font-size: 12px; }
+  .field input { font-size: 14px; padding: 4px 2px; }
+}
+</style>
+
+</head>
+<body>
+<noscript><h1>三角比メーカー</h1><p>直角三角形の辺や角度を2つ入れると sin・cos・tan を計算するツールです。JavaScript をオンにすると使えます。</p></noscript>
+<div class="wrap">
+  <header>
+    <h1>三角比メーカー</h1>
+    <p>図の中の枠に、辺の長さか角度を<b>2つ</b>入れてください。残りの辺と角、sin・cos・tan がすぐに出ます。</p>
+  </header>
+
+  <div class="main">
+    <section class="board" aria-label="直角三角形の図">
+      <div class="fig" id="fig">
+        <svg id="svg" viewBox="0 0 640 400" role="img" aria-label="入力に合わせて描かれる直角三角形"></svg>
+        <div class="field" data-k="c"><label for="in-c">斜辺 c</label><input id="in-c" type="text" inputmode="decimal" autocomplete="off"><span class="exact"></span></div>
+        <div class="field" data-k="a"><label for="in-a">高さ a</label><input id="in-a" type="text" inputmode="decimal" autocomplete="off"><span class="exact"></span></div>
+        <div class="field" data-k="b"><label for="in-b">底辺 b</label><input id="in-b" type="text" inputmode="decimal" autocomplete="off"><span class="exact"></span></div>
+        <div class="field" data-k="t"><label for="in-t">角 θ（度）</label><input id="in-t" type="text" inputmode="decimal" autocomplete="off"><span class="exact"></span></div>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+      <div class="presets">
+        <span>例：</span>
+        <button type="button" data-p='{"a":"3","b":"4"}'>3・4・5</button>
+        <button type="button" data-p='{"a":"1","b":"1"}'>1・1・√2</button>
+        <button type="button" data-p='{"t":"30","c":"2"}'>30° と斜辺 2</button>
+        <button type="button" data-p='{"t":"60","b":"1"}'>60° と底辺 1</button>
+        <button type="button" data-p='{"t":"25"}'>角度だけ 25°</button>
+        <button type="button" data-p='{}'>クリア</button>
+      </div>
+    </section>
+
+    <section class="results" aria-label="計算結果">
+      <div class="card" data-fn="sin" tabindex="0">
+        <div class="head"><span class="fn">sin θ</span><span class="hint">高さ ÷ 斜辺</span></div>
+        <div class="eq" id="eq-sin"></div>
+      </div>
+      <div class="card" data-fn="cos" tabindex="0">
+        <div class="head"><span class="fn">cos θ</span><span class="hint">底辺 ÷ 斜辺</span></div>
+        <div class="eq" id="eq-cos"></div>
+      </div>
+      <div class="card" data-fn="tan" tabindex="0">
+        <div class="head"><span class="fn">tan θ</span><span class="hint">高さ ÷ 底辺</span></div>
+        <div class="eq" id="eq-tan"></div>
+      </div>
+      <dl class="angles">
+        <dt>θ</dt><dd id="o-deg">—</dd>
+        <dt>ラジアン</dt><dd id="o-rad">—</dd>
+        <dt>もう一つの角</dt><dd id="o-other">—</dd>
+        <dt>面積</dt><dd id="o-area">—</dd>
+      </dl>
+      <p class="memo">覚え方：筆記体の <b>s</b> は 底辺→斜辺→高さ の順、<b>c</b> は 斜辺→底辺、<b>t</b> は 底辺→高さ となぞります。なぞった順に「分母→分子」です。<br>√ も使えます（例：<b>√2</b>、<b>2√3</b>）。整数や √ で入れると、答えも √ や分数の形で出ます。</p>
+    </section>
+  </div>
+</div>
+
+<script>
+const KEYS = ['a', 'b', 'c', 't'];
+const NAMES = { a: '高さ a', b: '底辺 b', c: '斜辺 c', t: '角 θ' };
+const fig = document.getElementById('fig');
+const svg = document.getElementById('svg');
+const statusEl = document.getElementById('status');
+const fields = {}, inputs = {}, exacts = {};
+for (const k of KEYS) {
+  fields[k] = fig.querySelector(`.field[data-k="${k}"]`);
+  inputs[k] = document.getElementById('in-' + k);
+  exacts[k] = fields[k].querySelector('.exact');
+}
+let order = [];          // 自分で入れた欄（新しいものが後ろ）。最新の2つを使う
+let positions = {};      // 入力欄の置き場所（viewBox 単位）
+let vb = { w: 640, h: 400 };
+
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+const isInt = x => Number.isFinite(x) && Math.abs(x - Math.round(x)) < 1e-9;
+const gcd = (x, y) => { while (y) [x, y] = [y, x % y]; return x; };
+
+function simplifySqrt(n) { // √n = k√m
+  for (let i = Math.floor(Math.sqrt(n)); i >= 2; i--) if (n % (i * i) === 0) return [i, n / (i * i)];
+  return [1, n];
+}
+function radicalStr(k, m) { return m === 1 ? String(k) : (k === 1 ? '' : k) + '√' + m; }
+function sqrtStr(n) { const [k, m] = simplifySqrt(n); return radicalStr(k, m); }
+function ratioStr(X, Y) { // √(X/Y) を √ と分数で
+  const [k0, m] = simplifySqrt(X * Y);
+  const g = gcd(k0, Y);
+  const k = k0 / g, den = Y / g;
+  const num = radicalStr(k, m);
+  return den === 1 ? num : num + '/' + den;
+}
+
+function parseVal(raw) {
+  let s = raw.replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+    .replace(/[．。]/g, '.').replace(/ルート|root/gi, '√').replace(/[°度\s]/g, '');
+  if (!s) return null;
+  let m = s.match(/^(\d+(?:\.\d+)?)?√(\d+(?:\.\d+)?)$/);
+  if (m) {
+    const k = m[1] ? parseFloat(m[1]) : 1, r = parseFloat(m[2]);
+    const v = k * Math.sqrt(r);
+    const sq = isInt(k) && isInt(r) && k * k * r <= 1e6 ? Math.round(k * k * r) : null;
+    return v > 0 ? { v, sq } : { bad: true };
+  }
+  if (/^(\d+\.?\d*|\.\d+)$/.test(s)) {
+    const v = parseFloat(s);
+    if (!(v > 0)) return { bad: true };
+    return { v, sq: isInt(v) && v <= 1000 ? Math.round(v * v) : null };
+  }
+  return { bad: true };
+}
+
+function fmt(x, digits = 4) {
+  if (isInt(x)) return String(Math.round(x));
+  return x.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+const SPECIAL = {
+  30: { sin: '1/2', cos: '√3/2', tan: '√3/3' },
+  45: { sin: '√2/2', cos: '√2/2', tan: '1' },
+  60: { sin: '√3/2', cos: '1/2', tan: '√3' },
+};
+
+function solve(g, P) {
+  const has = k => g.includes(k);
+  let a, b, c, t, A = null, B = null, C = null;
+  if (has('t')) {
+    t = P.t.v;
+    if (!(t > 0 && t < 90)) return { err: '角 θ は 0° より大きく 90° より小さい値にしてください。' };
+  }
+  if (has('a') && has('b')) {
+    a = P.a.v; b = P.b.v; c = Math.hypot(a, b); t = deg(Math.atan2(a, b));
+    if (P.a.sq && P.b.sq) { A = P.a.sq; B = P.b.sq; C = A + B; }
+  } else if (has('a') && has('c')) {
+    a = P.a.v; c = P.c.v;
+    if (a >= c) return { err: '斜辺 c がいちばん長い辺です。c を 高さ a より大きくしてください。' };
+    b = Math.sqrt(c * c - a * a); t = deg(Math.asin(a / c));
+    if (P.a.sq && P.c.sq) { A = P.a.sq; C = P.c.sq; B = C - A; }
+  } else if (has('b') && has('c')) {
+    b = P.b.v; c = P.c.v;
+    if (b >= c) return { err: '斜辺 c がいちばん長い辺です。c を 底辺 b より大きくしてください。' };
+    a = Math.sqrt(c * c - b * b); t = deg(Math.acos(b / c));
+    if (P.b.sq && P.c.sq) { B = P.b.sq; C = P.c.sq; A = C - B; }
+  } else if (has('t') && has('a')) {
+    a = P.a.v; b = a / Math.tan(rad(t)); c = a / Math.sin(rad(t));
+  } else if (has('t') && has('b')) {
+    b = P.b.v; a = b * Math.tan(rad(t)); c = b / Math.cos(rad(t));
+  } else if (has('t') && has('c')) {
+    c = P.c.v; a = c * Math.sin(rad(t)); b = c * Math.cos(rad(t));
+  }
+  return { a, b, c, t, A, B, C };
+}
+
+function fracHTML(numCls, numVal, denCls, denVal) {
+  return `<span class="frac"><span class="${numCls}">${numVal}</span><span class="${denCls}">${denVal}</span></span>`;
+}
+
+function render() {
+  const P = {};
+  let bad = null;
+  for (const k of order) {
+    const p = parseVal(inputs[k].value);
+    if (!p || p.bad) { bad = k; continue; }
+    P[k] = p;
+  }
+  const g = order.filter(k => P[k]).slice(-2);
+  let res = null, msg = '', err = false;
+
+  if (bad) { msg = `${NAMES[bad]} の値が読めません。数字（例：3、2.5、√2、2√3）で入れてください。`; err = true; }
+  else if (g.length === 2) {
+    res = solve(g, P);
+    if (res.err) { msg = res.err; err = true; res = null; }
+    else msg = `${g.map(k => NAMES[k]).join(' と ')} から残りを計算しました。点線の枠が計算した値です。`;
+  } else if (g.length === 1 && g[0] === 't') {
+    const t = P.t.v;
+    if (t > 0 && t < 90) {
+      res = { t, a: null, b: null, c: null };
+      msg = '角度だけでも sin・cos・tan は決まります。辺の長さを出すには、辺を1つ入れてください。';
+    } else { msg = '角 θ は 0° より大きく 90° より小さい値にしてください。'; err = true; }
+  } else if (g.length === 1) {
+    msg = `${NAMES[g[0]]} が入りました。あと1つ、別の辺か角 θ を入れてください。`;
+  } else {
+    msg = '辺の長さか角度を2つ入れてください。';
+  }
+  statusEl.textContent = msg;
+  statusEl.classList.toggle('err', err);
+
+  // 入力欄
+  const sq = res ? { a: res.A, b: res.B, c: res.C } : {};
+  for (const k of KEYS) {
+    const given = g.includes(k);
+    const inp = inputs[k];
+    if (!given && document.activeElement !== inp && !(bad === k)) {
+      const v = res ? res[k] : null;
+      inp.value = v == null ? '' : fmt(v, k === 't' ? 2 : 4);
+    }
+    inp.classList.toggle('computed', !given && !!res && res[k] != null);
+    let ex = '';
+    if (k !== 't' && sq[k] != null && !isInt(Math.sqrt(sq[k]))) ex = '= ' + sqrtStr(sq[k]);
+    if (k === 't' && res && !given && !isInt(res.t)) ex = '≈ ' + res.t.toFixed(2) + '°';
+    exacts[k].textContent = ex;
+  }
+
+  // 三角比
+  const out = { sin: '', cos: '', tan: '' };
+  if (res) {
+    const t = rad(res.t);
+    const val = { sin: Math.sin(t), cos: Math.cos(t), tan: Math.tan(t) };
+    let exact = {};
+    if (res.A != null) exact = { sin: ratioStr(res.A, res.C), cos: ratioStr(res.B, res.C), tan: ratioStr(res.A, res.B) };
+    else for (const s of [30, 45, 60]) if (Math.abs(res.t - s) < 1e-9) exact = SPECIAL[s];
+    const parts = { sin: ['a', 'c'], cos: ['b', 'c'], tan: ['a', 'b'] };
+    for (const fn of ['sin', 'cos', 'tan']) {
+      const [n, d] = parts[fn];
+      let h = '';
+      if (res.a != null) h += fracHTML(n, fmt(res[n]), d, fmt(res[d])) + '<span class="op">=</span>';
+      const approx = isInt(val[fn]) ? fmt(val[fn]) : val[fn].toFixed(4);
+      const same = res.a != null && exact[fn] === `${fmt(res[n])}/${fmt(res[d])}`;
+      if (exact[fn] && exact[fn] !== approx && !same) h += `<span class="ex">${exact[fn]}</span><span class="op">=</span>`;
+      h += `<span class="dec">${approx}</span>`;
+      out[fn] = h;
+    }
+    document.getElementById('o-deg').textContent = fmt(res.t, 2) + '°';
+    document.getElementById('o-rad').textContent = rad(res.t).toFixed(4) + ' rad';
+    document.getElementById('o-other').textContent = fmt(90 - res.t, 2) + '°';
+    document.getElementById('o-area').textContent = res.a != null ? fmt(res.a * res.b / 2) : '—（辺が1つ必要）';
+  } else {
+    for (const id of ['o-deg', 'o-rad', 'o-other', 'o-area']) document.getElementById(id).textContent = '—';
+  }
+  for (const fn of ['sin', 'cos', 'tan']) {
+    document.getElementById('eq-' + fn).innerHTML = out[fn] || '<span class="op">—</span>';
+  }
+
+  draw(res ? res.t : 36.87, !res);
+}
+
+function draw(tDeg, ghost) {
+  const W = fig.clientWidth || 640;
+  vb = W < 560 ? { w: 520, h: 430 } : { w: 640, h: 400 };
+  const L = 130, R = 130, T = 50, Bm = 90;
+  const availW = vb.w - L - R, availH = vb.h - T - Bm;
+  const td = Math.min(80, Math.max(10, tDeg));
+  const co = Math.cos(rad(td)), si = Math.sin(rad(td));
+  const s = Math.min(availW / co, availH / si);
+  const bw = s * co, bh = s * si;
+  const x0 = L + (availW - bw) / 2;
+  const y0 = vb.h - Bm - (availH - bh) / 2;
+  const Bv = [x0, y0], Cv = [x0 + bw, y0], Av = [x0 + bw, y0 - bh];
+
+  let grid = '';
+  for (let x = 0; x <= vb.w; x += 20) grid += `<line class="grid-line" x1="${x}" y1="0" x2="${x}" y2="${vb.h}"/>`;
+  for (let y = 0; y <= vb.h; y += 20) grid += `<line class="grid-line" x1="0" y1="${y}" x2="${vb.w}" y2="${y}"/>`;
+
+  const r = Math.min(40, bw * 0.55, bh * 1.2);
+  const ex = Bv[0] + r * co, ey = Bv[1] - r * si;
+  const lr = r + 16, lx = Bv[0] + lr * Math.cos(rad(td / 2)), ly = Bv[1] - lr * Math.sin(rad(td / 2)) + 6;
+  const m = 15;
+
+  svg.setAttribute('viewBox', `0 0 ${vb.w} ${vb.h}`);
+  svg.innerHTML = `${grid}
+    <g class="${ghost ? 'ghost' : ''}">
+      <polygon class="tri" points="${Bv} ${Cv} ${Av}"/>
+      <path class="mark" d="M${Cv[0] - m},${Cv[1]} L${Cv[0] - m},${Cv[1] - m} L${Cv[0]},${Cv[1] - m}"/>
+      <path class="arc" d="M${Bv[0] + r},${Bv[1]} A${r},${r} 0 0 0 ${ex},${ey}"/>
+      <text class="arc-label" x="${lx}" y="${ly}" text-anchor="middle">θ</text>
+      <line class="side side-b" x1="${Bv[0]}" y1="${Bv[1]}" x2="${Cv[0]}" y2="${Cv[1]}"/>
+      <line class="side side-a" x1="${Cv[0]}" y1="${Cv[1]}" x2="${Av[0]}" y2="${Av[1]}"/>
+      <line class="side side-c" x1="${Bv[0]}" y1="${Bv[1]}" x2="${Av[0]}" y2="${Av[1]}"/>
+    </g>`;
+
+  const len = Math.hypot(bw, bh);
+  const mid = [(Bv[0] + Av[0]) / 2, (Bv[1] + Av[1]) / 2];
+  positions = {
+    b: [(Bv[0] + Cv[0]) / 2, y0 + 48],
+    a: [Cv[0] + 72, (Av[1] + Cv[1]) / 2],
+    c: [mid[0] - bh / len * 58, mid[1] - bw / len * 58],
+    t: [Bv[0] - 70, y0],
+  };
+  place();
+}
+
+function place() {
+  const W = fig.clientWidth, H = W * vb.h / vb.w;
+  const sc = W / vb.w;
+  for (const k of KEYS) {
+    const el = fields[k], w = el.offsetWidth, h = el.offsetHeight;
+    const [ux, uy] = positions[k] || [0, 0];
+    const x = Math.min(W - w / 2 - 2, Math.max(w / 2 + 2, ux * sc));
+    const y = Math.min(H - h / 2, Math.max(h / 2, uy * sc));
+    el.style.left = (x - w / 2) + 'px';
+    el.style.top = (y - h / 2) + 'px';
+  }
+}
+
+for (const k of KEYS) {
+  inputs[k].addEventListener('input', () => {
+    order = order.filter(x => x !== k);
+    if (inputs[k].value.trim() !== '') order.push(k);
+    // 3つ目を入れたら、いちばん古い入力は計算側に回す
+    const valid = order.filter(x => { const p = parseVal(inputs[x].value); return p && !p.bad; });
+    if (valid.length > 2) order = order.filter(x => x !== valid[0]);
+    render();
+  });
+  inputs[k].addEventListener('blur', render);
+}
+
+document.querySelectorAll('.presets button').forEach(btn => btn.addEventListener('click', () => {
+  const p = JSON.parse(btn.dataset.p);
+  order = [];
+  for (const k of KEYS) inputs[k].value = '';
+  for (const k of Object.keys(p)) { inputs[k].value = p[k]; order.push(k); }
+  render();
+}));
+
+document.querySelectorAll('.card').forEach(card => {
+  const on = () => fig.dataset.hl = card.dataset.fn, off = () => delete fig.dataset.hl;
+  card.addEventListener('mouseenter', on); card.addEventListener('mouseleave', off);
+  card.addEventListener('focus', on); card.addEventListener('blur', off);
+});
+
+let lastW = 0;
+new ResizeObserver(() => { const w = fig.clientWidth; if (w !== lastW) { lastW = w; render(); } }).observe(fig);
+fig.style.minHeight = '0';
+
+inputs.a.value = '3'; inputs.b.value = '4'; order = ['a', 'b'];
+render();
+</script>
+</body>
+</html>
