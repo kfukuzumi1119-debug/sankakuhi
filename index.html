@@ -464,7 +464,6 @@ let lastW = 0;
 new ResizeObserver(() => { const w = fig.clientWidth; if (w !== lastW) { lastW = w; render(); } }).observe(fig);
 fig.style.minHeight = '0';
 
-inputs.a.value = '3'; inputs.b.value = '4'; order = ['a', 'b'];
 render();
 </script>
 </body>
